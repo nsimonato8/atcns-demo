@@ -7,6 +7,9 @@ from scapy.layers.dot11 import Dot11
 from scapy.utils import PcapReader, tcpdump
 from preprocessing import PacketSet
 
+AP_MAC_ADDRESS = ""
+BPF_FILTER = f"wlan type data subtype data && wlan.da == {AP_MAC_ADDRESS}"
+
 
 def read_from_pcap(path: str, bpf_filter: str) -> PacketSet:
     """
@@ -19,6 +22,6 @@ def read_from_pcap(path: str, bpf_filter: str) -> PacketSet:
     packet_stream = []
     with PcapReader(tcpdump(path, args=["-w", "-", bpf_filter], getfd=True)) as pcap_reader:
         for pkt in pcap_reader:
-            dot11_packet = pkt.time, Dot11(pkt)
+            dot11_packet = len(pkt), pkt.time, Dot11(pkt)
             packet_stream.append(dot11_packet)
     return packet_stream
