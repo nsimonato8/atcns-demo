@@ -98,5 +98,25 @@ def flow_creation(pkt_list: pd.DataFrame):
     flow_pd.loc[:, "Duration_mean"] = pkt_list.groupby(by="SourceAddress")["Duration"].mean()
     flow_pd.loc[:, "Duration_sd"] = pkt_list.groupby(by="SourceAddress")["Duration"].sd()
     flow_pd.loc[:, "Bandwidth_sd"] = pkt_list.groupby(by="SourceAddress")["Bandwidth"].sd()
-    flow_pd.loc[:, "CDF_npl"] = pkt_list.groupby(by="SourceAddress")["PacketLength"].apply(lambda x: cdf_value(x, False))
+    flow_pd.loc[:, "CDF_pl"] = pkt_list.groupby(by="SourceAddress")["PacketLength"].apply(lambda x: cdf_value(x, False))
     return flow_pd
+
+
+def binary_labeler(flows: pd.DataFrame, criterion, label_name: str, label_values: Tuple[int,int] = (0,1),
+                   inplace: bool = False) -> pd.DataFrame:
+    """
+    This function takes a Pandas DataFrame as input, at creates a new column with name @label_name, to which assigns the
+    first value of @label_value to the rows that verify @criterion. To the other rows, the second value of @label_value
+    is assigned.
+
+    :param inplace: A boolean, set it to true to apply the changes to flows, otherwise a modified copy will be returned.
+    :param label_name: The name of the response variable's label.
+    :param flows: A Pandas DataFrame that contains the network flows.
+    :param criterion: An expression to use inside a Pandas .loc function to filter which rows to label.
+    :param label_values: the value to assign to the selected rows. Defaults to (0,1).
+    :return: The labeled dataframe.
+    """
+    flows_res = flows if inplace else flows.copy()
+    flows_res.loc[label_name] = label_values[1]
+    flows_res.loc[criterion, label_name] = label_values[0]
+    return flows_res
