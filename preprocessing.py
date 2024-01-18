@@ -62,23 +62,26 @@ def build_time_interval_array(timestamps: list) -> np.ndarray:
     return np.array([mean(intervals)] + intervals)
 
 
-def feature_expansion(pkt_list: PacketSet) -> pd.DataFrame:
+def feature_expansion_raw(pkt_list: PacketSet) -> pd.DataFrame:
     """
     This function extract the main features from each packet's Wi-Fi header and collects everything into a Pandas
     DataFrame.
     :param pkt_list: List of the filtered packets from the .pcap file.
     :return: Pandas Dataframe of each packet and their main features.
     """
-    pkt_length = list(map(lambda pkt, _, __: pkt, pkt_list))
-    x = list(map(lambda _, __, pkt: dot11_to_feature(pkt), pkt_list))
-    timestamps = list(map(lambda _, t, __: t, pkt_list))
+    pkt_length = list(map(lambda pkt, *_,: pkt[0], pkt_list))
+    x = list(map(lambda *pkt: dot11_to_feature(pkt[0][2]), pkt_list))
+    timestamps = list(map(lambda *t: t[0][1], pkt_list))
     pd_x = pd.DataFrame(x, columns=["SourceAddress", "DestinationAddress", "Duration"])
-    pd_x.loc[:, "PacketLength"] = pd.Series(pkt_length)
-    pd_x.loc[:, "Timestamp"] = pd.Series(timestamps)
+    pd_x.loc[:, "Duration"] = pd_x.loc[:, "Duration"].astype(int)
+    pd_x.loc[:, "PacketLength"] = pd.Series(pkt_length, dtype=int)
+    pd_x.loc[:, "Timestamp"] = pd.Series(timestamps, dtype=float)
     pd_x.loc[:, "TimestampOffset"] = pd_x["Timestamp"] - pd_x["Timestamp"].min()
     # Timestamps are expressed as offsets from the first packet.
-    pd_x.loc[:, "TransmissionTime"] = pd.Series(build_time_interval_array(timestamps))
+    pd_x.loc[:, "TransmissionTime"] = pd.Series(build_time_interval_array(timestamps), dtype=float)
+    pd_x.loc[pd_x["TransmissionTime"] <= 0, "TransmissionTime"] = pd_x.loc[pd_x["TransmissionTime"] > 0, "TransmissionTime"].min() # Fixes division by 0
     pd_x.loc[:, "Bandwidth"] = pd_x["PacketLength"] / pd_x["TransmissionTime"]
+    pd_x.loc[:, "Bandwidth"] = pd_x.loc[:, "Bandwidth"].astype(float)
     return pd_x
 
 
