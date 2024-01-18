@@ -18,7 +18,7 @@ AP_MAC_ADDRESS = ""
 BPF_FILTER = f"wlan type data subtype data && wlan.da == {AP_MAC_ADDRESS}"
 
 
-def read_from_pcap(path: str, bpf_filter: str="") -> PacketSet:
+def read_from_pcap(path: str, bpf_filter: str= "") -> PacketSet:
     """
     This function reads the .pcap file and applies the BPF filter given in input.
 
