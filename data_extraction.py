@@ -43,5 +43,5 @@ def read_from_wav(filename: str) -> AudioRecording:
     :return: AudioRecording encoding of the audio file, that is a (bit rate, values) tuple of type (int, Numpy Ndarray).
     """
     assert len(filename) > 4, "'filename' is not a valid .wav file path."
-    assert filename[:-5] == ".wav", "'filename' should be the path to a .wav file."
+    assert filename[-4:] == ".wav", "'filename' should be the path to a .wav file."
     return read_audio_file(filename=filename)

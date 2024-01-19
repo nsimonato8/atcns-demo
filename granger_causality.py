@@ -69,4 +69,6 @@ def is_granger_caused(granger_causality_table: pd.DataFrame, y: SeriesName, x: S
         :param threshold:
     :return: True iff @y is Granger-Caused by @x.
     """
+    y += "_y"
+    x += "_x"
     return granger_causality_table.loc[y, x] < threshold

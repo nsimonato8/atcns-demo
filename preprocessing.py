@@ -97,15 +97,15 @@ def flow_creation(pkt_list: pd.DataFrame):
     :param pkt_list: The Pandas DataFrame that contains the packets and their features.
     :return: A Pandas DataFrame that groups the input one into traffic flows and computes their aggregate features.
     """
-    flow_pd = pd.DataFrame(index=pkt_list["SourceAddress"].unique(), columns=["CDF_npl", "Duration_mean", "Duration_sd", "Bandwidth_sd"])
+    flow_pd = pd.DataFrame(index=pkt_list["SourceAddress"].unique(), columns=["Duration_mean", "Duration_sd", "Bandwidth_sd", "CDF_pl"])
     flow_pd.loc[:, "Duration_mean"] = pkt_list.groupby(by="SourceAddress")["Duration"].mean()
-    flow_pd.loc[:, "Duration_sd"] = pkt_list.groupby(by="SourceAddress")["Duration"].sd()
-    flow_pd.loc[:, "Bandwidth_sd"] = pkt_list.groupby(by="SourceAddress")["Bandwidth"].sd()
+    flow_pd.loc[:, "Duration_sd"] = pkt_list.groupby(by="SourceAddress")["Duration"].std()
+    flow_pd.loc[:, "Bandwidth_sd"] = pkt_list.groupby(by="SourceAddress")["Bandwidth"].std()
     flow_pd.loc[:, "CDF_pl"] = pkt_list.groupby(by="SourceAddress")["PacketLength"].apply(lambda x: cdf_value(x, False))
     return flow_pd
 
 
-def binary_labeler(flows: pd.DataFrame, criterion, label_name: str, label_values: Tuple[int,int] = (0,1),
+def binary_labeler(flows: pd.DataFrame, criterion, label_name: str, label_values: Tuple[int,int] = (0, 1),
                    inplace: bool = False) -> pd.DataFrame:
     """
     This function takes a Pandas DataFrame as input, at creates a new column with name @label_name, to which assigns the
@@ -120,6 +120,6 @@ def binary_labeler(flows: pd.DataFrame, criterion, label_name: str, label_values
     :return: The labeled dataframe.
     """
     flows_res = flows if inplace else flows.copy()
-    flows_res.loc[label_name] = label_values[1]
-    flows_res.loc[criterion, label_name] = label_values[0]
+    flows_res.loc[:, label_name] = label_values[0]
+    flows_res.loc[criterion, label_name] = label_values[1]
     return flows_res
