@@ -22,6 +22,20 @@ def normalize(v: np.ndarray) -> np.ndarray:
     return v if norm == 0 else v/norm
 
 
+def filter_by_device(capture: pd.DataFrame, target_source_address: str):
+    """
+    Filters the rows of @capture that have the SourceAddress field set as @target_source_address. 
+
+    Args:
+        capture (pd.DataFrame): Pandas DataFrame of the cleaned captured file.
+        target_source_address (str): The source address used in the filtering.
+
+    Returns:
+        pd.DataFrame: Pandas DataFrame of the filtered captured file.
+    """
+    return capture.loc[capture["SourceAddress"] == target_source_address, :]
+
+
 def cdf_value(v: np.ndarray, normalized: bool = True) -> float:
     """
     This function returns the CDF value over the input data series, as specified in the DeWiCam paper (section 5.3).
