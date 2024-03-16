@@ -46,7 +46,8 @@ def cdf_value(v: np.ndarray, normalized: bool = True) -> float:
     data = np.sort(normalize(v)) if normalized else np.sort(v)
     sample = np.random.choice(a=data, size=round(len(data)/4), replace=False)
     # This is my interpretation of "over a small number of samples"
-    return np.cumsum(sample)[-1]
+    res = np.cumsum(sample, dtype=float)
+    return res[-1] if len(res) > 1 else 0.
 
 
 def dot11_to_feature(pkt: Dot11) -> np.ndarray:
@@ -112,10 +113,12 @@ def flow_creation(pkt_list: pd.DataFrame):
     :return: A Pandas DataFrame that groups the input one into traffic flows and computes their aggregate features.
     """
     flow_pd = pd.DataFrame(index=pkt_list["SourceAddress"].unique(), columns=["Duration_mean", "Duration_sd", "Bandwidth_sd", "CDF_pl"])
-    flow_pd.loc[:, "Duration_mean"] = pkt_list.groupby(by="SourceAddress")["Duration"].mean()
-    flow_pd.loc[:, "Duration_sd"] = pkt_list.groupby(by="SourceAddress")["Duration"].std()
-    flow_pd.loc[:, "Bandwidth_sd"] = pkt_list.groupby(by="SourceAddress")["Bandwidth"].std()
+    flow_pd.loc[:, "Duration_mean"] = pkt_list[["SourceAddress", "Duration"]].groupby(by="SourceAddress").mean()
+    flow_pd.loc[:, "Duration_sd"] = pkt_list[["SourceAddress", "Duration"]].groupby(by="SourceAddress").std()
+    flow_pd.loc[:, "Bandwidth_sd"] = pkt_list[["SourceAddress", "Bandwidth"]].groupby(by="SourceAddress").std()
     flow_pd.loc[:, "CDF_pl"] = pkt_list.groupby(by="SourceAddress")["PacketLength"].apply(lambda x: cdf_value(x, False))
+    fill = {"CDF_pl": 0.}
+    flow_pd = flow_pd.fillna(value=fill, inplace=False)
     return flow_pd
 
 
