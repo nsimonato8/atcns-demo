@@ -25,7 +25,7 @@ if __name__ == "__main__":
     
     # Reading the network data from the capture files
     captures_dir = "captures/" 
-    captures_files = os.listdir("captures/network")
+    captures_files = ["captures/network/" + f for f in os.listdir("captures/network")]
     captures = [read_from_pcap(path=f) for f in captures_files]
     
     # The network captures are pre-processed
@@ -34,10 +34,10 @@ if __name__ == "__main__":
     # Printing the distributions of the network captures
     plot_cols = ["Duration", "PacketLength", "TransmissionTime", "Bandwidth"]
     for c, f_c in zip(captures_pd, captures_files):
-        plot_packets_stat_distribution(capture=c, filename=f_c, save_fig=True)
+        plot_packets_stat_distribution(capture=c, filename=f_c, save_fig=not args.silent)
         
     # Cleaning the data and assigning the labels
-    target_source_address = ["0a:1a:cc:8e:ca:9e"]
+    target_source_address = "0a:1a:cc:8e:ca:9e"
     labels = [(0,0), (0,0), (0,1), (0,0), (0,1), (0,1), (0,1), (0,1), (0,1), (0,1)]
     flows_labeled_l = []
 
@@ -72,11 +72,11 @@ if __name__ == "__main__":
             sampled = sample_audio(sound_capture=audio[1], network_capture=network, offset=offset, sample_rate=audio[0])
             concat_pd = pd.concat([network.reset_index()["PacketLength"], pd.Series(sampled)], axis=1)
             concat_pd.columns = ["PacketLength", "Sound"]
-            grange_caus_mat.append(grangers_causation_matrix(data=concat_pd, variables=concat_pd.columns, verbose=False, maxlag=5))
+            grange_caus_mat.append(grangers_causation_matrix(data=concat_pd, variables=concat_pd.columns, verbose=not args.silent, maxlag=5))
             
         with open(f"datasets/results/granger-causality-results_{DATASET_NUMBER}.txt", "w") as f:
             for matrix in grange_caus_mat:
                 result = not is_granger_caused(granger_causality_table=matrix, y="PacketLength", x="Sound", threshold=.05)
-                f.write(f"Result for Granger-Causality: {"Negative" if result else "Positive"}\n\t Granger-Causality matrix:\n\t|{matrix[0,0]}|{matrix[0,1]}|\n\t|{matrix[1,0]}|{matrix[1,1]}|")
+                f.write(f"Result for Granger-Causality: {'Negative' if result else 'Positive'}\n\t Granger-Causality matrix:\n\t|{matrix[0,0]}|{matrix[0,1]}|\n\t|{matrix[1,0]}|{matrix[1,1]}|")
                 f.write(f"\t{5 * '='}\n\n")
     
