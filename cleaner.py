@@ -43,6 +43,7 @@ if __name__ == "__main__":
 
     for c, f_c, l in zip(captures_pd, captures_files, labels):
         filtered_capture = c.dropna(axis=0, inplace=False, subset=["SourceAddress"])
+        filtered_capture.loc[filtered_capture["SourceAddress"] == target_source_address, :].to_csv(f"datasets/{f_c}_filtered.csv")
         flows = flow_creation(filtered_capture)
         flows_labeled = binary_labeler(flows=flows, criterion=target_source_address, label_name="IsMicrophone", label_values=l)
         flows_labeled.to_csv(f"datasets/{f_c}_flows_labeled.csv")
