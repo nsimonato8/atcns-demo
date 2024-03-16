@@ -8,6 +8,14 @@ from typing import List, Dict, Tuple
 from sklearn.base import ClassifierMixin
 from sklearn.model_selection import train_test_split, GridSearchCV
 
+from sklearn.tree import DecisionTreeClassifier, ExtraTreeClassifier
+from sklearn.ensemble import ExtraTreesClassifier, RandomForestClassifier
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC
+
+import pickle
+import pprint
+
 Dataset = np.ndarray | pd.DataFrame
 CandidateModels = List[ClassifierMixin]
 ParameterGrids = List[Dict]
@@ -42,7 +50,7 @@ def model_selection(x: Dataset, y: Dataset, candidates: CandidateModels, paramet
                     selection_params: dict, test_split: float = 0.25) -> Tuple[List, List]:
     """
 
-    :param Dataset x: Pre-processed sampled from the dataset.
+    :param Dataset x: Pre-processed samples from the dataset.
     :param Dataset y: True labels for @x
     :param CandidateModels candidates:  List of candidate model instances of which the optimized version will be extracted.
     :param ParameterGrids parameter_grids: List of parameter grids on which all the candidate models will be selected.
@@ -64,3 +72,76 @@ def model_selection(x: Dataset, y: Dataset, candidates: CandidateModels, paramet
         scores.append(best_model.score(X=x_test, y=y_test))
 
     return best_candidates, scores
+
+
+if __name__ == "__main__":
+       from cleaner import DATASET_NUMBER
+       
+       # Importing the data from the dataset file
+       x = pd.read_csv(f"datasets/full_dataset_test-{DATASET_NUMBER}.csv")
+       y = x["IsMicrophone"]
+       x = x[list(set(x.columns) - set(["IsMicrophone"]))]      
+       
+       # Importing the selection parameters
+       selection_parameters = {
+              'cv': 5
+       }
+       
+       # Generating the candidate models' list
+       model_candidates = [
+              DecisionTreeClassifier(),
+              ExtraTreeClassifier(),
+              RandomForestClassifier(),
+              ExtraTreesClassifier(),
+              KNeighborsClassifier(),
+              SVC()              
+       ]
+       
+       # Generating the hyperparameters for all the models
+       hyperparameters_candidates = [
+              { # DecisionTreeClassifier
+                     'criterion': ['gini', 'entropy'],
+                     'splitter': ['best', 'random']
+              },
+              { # ExtraTreeClassifier
+                     'criterion': ['gini', 'entropy'],
+                     'splitter': ['best', 'random']
+              },
+              { # RandomForestClassifier
+                     'n_estimators': [20, 50, 100, 250],
+                     'criterion': ['gini', 'entropy'],
+                     'bootstrap': [True, False],
+              },
+              { # ExtraTreesClassifier
+                     'n_estimators': [20, 50, 100, 250],
+                     'criterion': ['gini', 'entropy'],
+                     'bootstrap': [True, False],
+              },
+              { # KNeighborsClassifier
+                     'n_neighbors': [2, 3, 5, 7, 10],
+                     'weights': ['uniform', 'distance'],
+                     'p': [1,2,3]
+              },
+              { # SVC
+                     'C': [1e-3, 1e-2, 1e-1, .5, 1., 5.],
+                     'kernel': ['linear', 'poly', 'rbf', 'sigmoid'],
+                     'degree': [2, 3],
+              }
+       ]
+       
+       best_candidates, scores = model_selection(x_train=x, 
+                                                 y_train=y, 
+                                                 candidates=model_candidates, 
+                                                 parameter_grids=hyperparameters_candidates, 
+                                                 selection_params=selection_parameters)
+       
+       with open("training_results.txt", 'w') as f:
+              for model, score in zip(best_candidates, scores):
+                     f.write(model.__class__.__name__)
+                     f.write(pprint.pprint(model.get_params(), stream=f))
+                     f.write(score)
+                     f.write(5 * '=')
+                     with open("model_dump.obj", 'w') as model_file_dump:
+                            pickle.dump(model, model_file_dump)
+              
+       
