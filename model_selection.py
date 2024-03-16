@@ -79,12 +79,14 @@ if __name__ == "__main__":
        
        # Importing the data from the dataset file
        x = pd.read_csv(f"datasets/full_dataset_test-{DATASET_NUMBER}.csv")
-       y = x["IsMicrophone"]
-       x = x[list(set(x.columns) - set(["IsMicrophone"]))]      
+       y = x.loc[:, "IsMicrophone"]
+       x = x.loc[:, list(set(x.columns) - set(["IsMicrophone", "SourceAddress", "Unnamed: 0"]))]      
        
        # Importing the selection parameters
        selection_parameters = {
-              'cv': 5
+              'cv': 5,
+              'n_jobs': -1,
+              'verbose': True
        }
        
        # Generating the candidate models' list
@@ -129,8 +131,8 @@ if __name__ == "__main__":
               }
        ]
        
-       best_candidates, scores = model_selection(x_train=x, 
-                                                 y_train=y, 
+       best_candidates, scores = model_selection(x=x, 
+                                                 y=y, 
                                                  candidates=model_candidates, 
                                                  parameter_grids=hyperparameters_candidates, 
                                                  selection_params=selection_parameters)
