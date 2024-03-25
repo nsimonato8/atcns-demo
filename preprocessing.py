@@ -28,10 +28,7 @@ def filter_by_device(capture: pd.DataFrame, target_source_address: str):
 
     Args:
         capture (pd.DataFrame): Pandas DataFrame of the cleaned captured file.
-        target_source_address (str): The source address used in the filtering.
-
-    Returns:
-        pd.DataFrame: Pandas DataFrame of the filtered captured file.
+        target_source_address (str): The source address uTransmissionTimetured file.
     """
     return capture.loc[capture["SourceAddress"] == target_source_address, :]
 
