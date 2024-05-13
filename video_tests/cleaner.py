@@ -35,7 +35,7 @@ if __name__ == "__main__":
     pd_datasets = []
     for service in services:
         # Importing the captures
-        capture_light = [read_from_pcap(path= captures_dir + service + "/" + "light/" + f) for f in filter(lambda x: ".cap" in x, os.listdir(captures_dir + service + "/" + "light/"))]
+        capture_light = [read_from_pcap(path= captures_dir + service + "/" + "lights/" + f) for f in filter(lambda x: ".cap" in x, os.listdir(captures_dir + service + "/" + "lights/"))]
         captures_nolight = [read_from_pcap(path= captures_dir + service + "/" + "no-lights/" + f) for f in filter(lambda x: ".cap" in x, os.listdir(captures_dir + service + "/" + "no-lights/"))]
         
         # The network captures are pre-processed

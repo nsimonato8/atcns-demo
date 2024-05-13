@@ -43,6 +43,6 @@ def feature_expansion_raw(pkt_list: PacketSet) -> pd.DataFrame:
     # Timestamps are expressed as offsets from the first packet.
     pd_x.loc[:, "Timestamp"] = pd.Series(timestamps, dtype=float)
     pd_x.loc[:, "TimestampOffset"] = pd_x["Timestamp"] - pd_x["Timestamp"].min()
-    pd_x.loc[:, "diff_Timestamp"] = np.diff(pd_x.loc["Timestamp"].values, prepend=[0]) 
+    pd_x.loc[:, "diff_Timestamp"] = np.diff(pd_x["Timestamp"].values, prepend=[0]) 
     
     return pd_x
