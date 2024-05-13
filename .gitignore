@@ -162,6 +162,7 @@ cython_debug/
 # Directories
 audio_tests/captures/
 audio_tests/datasets/
+audio_tests/imgs/
 
 video_tests/datasets/
 video_tests/captures_video
