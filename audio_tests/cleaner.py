@@ -1,7 +1,7 @@
 """
 This file pre-processes the data directly from the capture files and organizes the data in both data flows and in packet lists.
 """
-DATASET_NUMBER = 2
+DATASET_NUMBER = 3
 import os
 import argparse
 
@@ -18,6 +18,8 @@ from granger_causality import is_granger_caused, grangers_causation_matrix
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(prog="cleaner", description="This scripts reads, cleans and organizes the data into a dataset.")
+    parser.add_argument("-S", "--source_address", type=str, required=True, help="set the MAC address to observe")
+    parser.add_argument("-L", "--labels", type=str, required=True, help="set the labels of the datasets")
     parser.add_argument("-s", "--silent", type=bool, help="if set, does not print the figures")
     parser.add_argument("-a", "--audio", type=bool, help="if set, performs the causality studio on the audio tracks")
     

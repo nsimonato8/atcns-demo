@@ -44,7 +44,7 @@ def sample_audio(sound_capture: list[float], network_capture: pd.DataFrame, samp
 
 
 def plot_audio_network_comparison(sound_capture: list[float], network_capture: pd.DataFrame, sample_rate: int=0, offset: float=0, 
-                                  save_fig: bool=False, save_dir: str="imgs"):
+                                  save_fig: bool=False, save_dir: str="imgs", title: str=""):
     """
     Plots the comparison between the audio capture and the network capture.
 
@@ -73,7 +73,7 @@ def plot_audio_network_comparison(sound_capture: list[float], network_capture: p
     ax2.set_ylim([-network_capture["PacketLength"].max(), network_capture["PacketLength"].max()])
 
     fig.tight_layout()  # otherwise the right y-label is slightly clipped
-    plt.title("Network traffic & Recorded sound comparison")
+    plt.title(f"Network traffic & Recorded sound comparison {title}")
     plt.legend()
     
     if save_fig:
