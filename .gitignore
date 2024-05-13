@@ -160,7 +160,10 @@ cython_debug/
 #.idea/
 
 # Directories
-captures/
-datasets/
+audio_tests/captures/
+audio_tests/datasets/
 
-.ipynb
+video_tests/datasets/
+video_tests/captures_video
+
+*.ipynb
