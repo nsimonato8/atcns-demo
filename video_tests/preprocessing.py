@@ -10,6 +10,9 @@ from scapy.layers.dot11 import Dot11
 
 PacketSet = List[Tuple[Any, Any, Dot11]]
 
+features_cols = ["SourceAddress", "DestinationAddress", "Duration", "PacketLength", "delta_PacketLength",
+                 "Timestamp"] #, "TimestampOffset", "diff_Timestamp"]
+
 def dot11_to_feature(pkt: Dot11) -> np.ndarray:
     """
     This function returns a numpy ndarray that contains an encoding of the most important features of the 802.11 frame.
@@ -36,13 +39,15 @@ def feature_expansion_raw(pkt_list: PacketSet) -> pd.DataFrame:
     
     pd_x = pd.DataFrame(x, columns=["SourceAddress", "DestinationAddress", "Duration"])
     
-    pd_x.loc[:, "Duration"] = pd_x.loc[:, "Duration"].astype(int)
+    #pd_x.loc[:, "Duration"] = pd_x.loc[:, "Duration"].astype(int)
+    
     pd_x.loc[:, "PacketLength"] = pd.Series(pkt_length, dtype=int)
     pd_x.loc[:, "delta_PacketLength"] = np.diff(pd_x["PacketLength"].values, prepend=[0]) 
     
     # Timestamps are expressed as offsets from the first packet.
     pd_x.loc[:, "Timestamp"] = pd.Series(timestamps, dtype=float)
-    pd_x.loc[:, "TimestampOffset"] = pd_x["Timestamp"] - pd_x["Timestamp"].min()
-    pd_x.loc[:, "diff_Timestamp"] = np.diff(pd_x["Timestamp"].values, prepend=[0]) 
+    
+    # pd_x.loc[:, "TimestampOffset"] = pd_x["Timestamp"] - pd_x["Timestamp"].min()
+    # pd_x.loc[:, "diff_Timestamp"] = np.diff(pd_x["Timestamp"].values, prepend=[0]) 
     
     return pd_x

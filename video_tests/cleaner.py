@@ -9,9 +9,14 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from data_extraction import read_from_pcap
-from preprocessing import feature_expansion_raw
+from preprocessing import feature_expansion_raw, features_cols
 
 from utils import plot_packets_stat_distribution, PLOT_COLS
+import sys
+
+np.set_printoptions(threshold=sys.maxsize)
+pd.set_option('display.max_rows', 100_000)
+pd.set_option('display.max_columns', 100_000)
 
 
 if __name__ == "__main__":
@@ -45,8 +50,8 @@ if __name__ == "__main__":
         captures_nolight = list(map(lambda x: feature_expansion_raw(x), captures_nolight))
         
         # Filtering the captures       
-        captures_light = list(map(lambda x: x.loc[x["SourceAddress"] == target_source_address, :].to_numpy(), captures_light))
-        captures_nolight = list(map(lambda x: x.loc[x["SourceAddress"] == target_source_address, :].to_numpy(), captures_nolight))
+        captures_light = list(map(lambda x: str(x.loc[x["SourceAddress"] == target_source_address, features_cols[2:]].to_numpy()).replace("\n", ""), captures_light))
+        captures_nolight = list(map(lambda x: str(x.loc[x["SourceAddress"] == target_source_address, features_cols[2:]].to_numpy()).replace("\n", ""), captures_nolight))
         
         # Assigning the values of light and service
         pd_captures_light = list(map(lambda x: (x, 1, service), captures_light))
@@ -54,11 +59,11 @@ if __name__ == "__main__":
         pd_captures_nolight = list(map(lambda x: (x, 0, service), captures_light))
         pd_captures_nolight = pd.DataFrame(pd_captures_nolight, columns=["X", "y", "service"])
         
-        pd_datasets.append(pd.concat([pd_captures_light, pd_captures_nolight], axis=0).reset_index(drop=True))
+        pd_datasets.append(pd.concat([pd_captures_light, pd_captures_nolight], axis=0, ignore_index=True))
         print("Done!")
         
         
-    pd.concat(pd_datasets, axis=0).reset_index().to_csv(f"datasets/dataset_{DATASET_NUMBER}_raw.csv")
+    pd.concat(pd_datasets, axis=0, ignore_index=True).to_csv(f"datasets/dataset_{DATASET_NUMBER}_raw.csv", index=False)
             
     
     # Printing the distributions of the network captures
