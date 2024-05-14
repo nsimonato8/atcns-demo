@@ -1,7 +1,7 @@
 """
 This file pre-processes the data directly from the capture files and organizes the data in both data flows and in packet lists.
 """
-DATASET_NUMBER = 3
+DATASET_NUMBER = 1
 import os
 import argparse
 
@@ -54,11 +54,11 @@ if __name__ == "__main__":
         pd_captures_nolight = list(map(lambda x: (x, 0, service), captures_light))
         pd_captures_nolight = pd.DataFrame(pd_captures_nolight, columns=["X", "y", "service"])
         
-        pd_datasets.append(pd.concat([pd_captures_light, pd_captures_nolight], axis=0))
+        pd_datasets.append(pd.concat([pd_captures_light, pd_captures_nolight], axis=0).reset_index(drop=True))
         print("Done!")
         
         
-    pd.concat(pd_datasets, axis=0).to_csv("datasets/dataset_{DATASET_NUMBER}_raw.csv")
+    pd.concat(pd_datasets, axis=0).reset_index().to_csv(f"datasets/dataset_{DATASET_NUMBER}_raw.csv")
             
     
     # Printing the distributions of the network captures
