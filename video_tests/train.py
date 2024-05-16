@@ -2,6 +2,7 @@ import mlflow
 from mlflow.models import infer_signature
 import pandas as pd
 import numpy as np
+import ast
 from cleaner import DATASET_NUMBER
 import tensorflow as tf
 import keras_tuner as kt
@@ -10,23 +11,23 @@ from tensorflow.keras.layers import Dense, SimpleRNN, LSTM, Conv3D, BatchNormali
 
 def load_dataset(n):
     from sklearn.model_selection import train_test_split
-    pd_dataset = pd.read_csv(f"datasets/dataset_{n}_raw.csv")
+    pd_dataset = pd.read_csv(f"video_tests/datasets/dataset_{n}_raw.csv")
     
-    X = pd_dataset["X"].apply(lambda x: np.reshape(np.asarray(np.matrix(x)), newshape=(-1, 4)))
-    X = [[(int(x[0]), int(x[1]), int(x[2]), float(x[3])) for x in y] for y in X]
+    X = pd_dataset["X"].apply(lambda x: ast.literal_eval(x.replace("'", "").replace(" ", ", ")))
+    X = tf.keras.utils.pad_sequences(sequences=X,
+                                     padding='post')
     
-    y = pd_dataset["y"].to_numpy()
+    y = np.reshape(pd_dataset["y"].to_numpy(), newshape=(-1, 1))
     
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=.2)
     
-    return (X_train, X_test), (y_train, y_test)
-
+    return (X_train, y_train), (X_test, y_test)
 
 class RNN_HyperModel(kt.HyperModel):
 
     def build(self, hp):
-        units = hp.Int(min_value=5, max_value=100, step=5)
-        learning_rate = hp.Choices(name="learning_rate", values=[1e-3, 1e-4, 5e-4])
+        units = hp.Int(name="units", min_value=5, max_value=100, step=5)
+        learning_rate = hp.Choice(name="learning_rate", values=[1e-3, 1e-4, 5e-4])
         
         model = Sequential()
 
@@ -55,8 +56,8 @@ class RNN_HyperModel(kt.HyperModel):
 class LSTM_HyperModel(kt.HyperModel):
 
     def build(self, hp):
-        units = hp.Int(min_value=5, max_value=100, step=5)
-        learning_rate = hp.Choices(name="learning_rate", values=[1e-3, 1e-4, 5e-4])
+        units = hp.Int(name="units", min_value=5, max_value=100, step=5)
+        learning_rate = hp.Choice(name="learning_rate", values=[1e-3, 1e-4, 5e-4])
         
         model = Sequential()
 
@@ -132,19 +133,19 @@ if __name__ == '__main__':
         "multi_class": "auto",
         "random_state": 42,
     }
+    stop_early = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=5)
+
     
     tuner = kt.BayesianOptimization(
-        RNN_HyperModel(),
-        max_trials=20,
+        LSTM_HyperModel(),
+        max_trials=50,
         overwrite=True,
         objective="val_loss",
-        directory="/tmp/tb",
-        callbacks=[]
+        directory="/tmp/tb"
     )
 
-    train, test = None, None
+    tuner.search(X_train, y_train, epochs=50, validation_split=0.2, callbacks=[stop_early])
 
-    tuner.search(train, epochs=50, validation_data=test)
 
     best_model = tuner.get_best_models()[0]
     best_hyperparameters= tuner.get_best_hyperparameters()[0].values
