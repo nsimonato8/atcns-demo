@@ -166,9 +166,12 @@ audio_tests/imgs/
 
 video_tests/datasets/
 video_tests/captures_video
-
 video_tests/mlflow/
 video_tests/mlartifacts/
 video_tests/mlruns/
+video_tests/imgs/
+video_tests/models/
+
+mlruns/
 
 *.ipynb
