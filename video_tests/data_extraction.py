@@ -15,7 +15,7 @@ from preprocessing import PacketSet
 AudioRecording = Tuple[int, np.ndarray]
 
 AP_MAC_ADDRESS = ""
-BPF_FILTER = f"wlan type data subtype data && wlan.da == {AP_MAC_ADDRESS}"
+BPF_FILTER = f"wlan.sa == {AP_MAC_ADDRESS}"
 
 
 def read_from_pcap(path: str) -> PacketSet:
@@ -23,7 +23,6 @@ def read_from_pcap(path: str) -> PacketSet:
     This function reads the .pcap file and applies the BPF filter given in input.
 
     :param path: Path of the .pcap file to extract.
-    :param bpf_filter: BPF filter to apply to the .pcap file.
     :return: List of filtered packets.
     """
     packet_stream = []
@@ -42,6 +41,6 @@ def read_from_wav(filename: str) -> AudioRecording:
     :param filename: The path of the .wav audio file to read.
     :return: AudioRecording encoding of the audio file, that is a (bit rate, values) tuple of type (int, Numpy Ndarray).
     """
-    assert len(filename) > 4, "'filename' is not a valid .wav file path."
+    assert len(filename) > 4, f"'{filename}' is not a valid .wav file path."
     assert filename[-4:] == ".wav", "'filename' should be the path to a .wav file."
     return read_audio_file(filename=filename)
