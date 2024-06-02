@@ -173,5 +173,6 @@ video_tests/imgs/
 video_tests/models/
 
 mlruns/
+mlflow/
 
 *.ipynb
